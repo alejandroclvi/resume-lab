@@ -1,19 +1,24 @@
-# ¶ ResumeLab
+# ¶ Free PDF Editor
 
-**A free, open-source resume PDF editor.** Design your resume like a document proofing desk: edit content in forms, style every element with a real CSS box model, arrange sections on a 12-column grid canvas — and download a true, ATS-friendly PDF. No accounts, no watermarks, no server: everything runs in your browser and your data never leaves your machine.
+**A free, open-source PDF editor.** Design your PDF like a document proofing desk: edit content in forms, style every element with a real CSS box model, arrange sections on a 12-column grid canvas — and download a true, ATS-friendly PDF. No accounts, no watermarks, no server, **no cookies**: everything runs in your browser and your data never leaves your device.
+
+- Draft documents live in your browser's `localStorage`
+- Uploaded reference PDFs live in your browser's `IndexedDB`
+- Nothing is uploaded to any server; we collect no information about you
 
 **▶ Try it live: [resume-lab-two.vercel.app](https://resume-lab-two.vercel.app)** — no install, no signup.
 
 ## Features
 
 - **Live PDF proof** — the preview *is* the PDF (rendered with `@react-pdf/renderer`), not an HTML approximation. What you see is byte-for-byte what you download.
-- **Click-to-select on the rendered PDF** — click any text in the proof and the inspector jumps to that element's controls.
+- **Click-to-select on the rendered PDF** — click any text in the proof and the left form jumps to that element's controls.
 - **Grid design canvas** — a blueprint view where sections are draggable blocks on a 12-column grid. Draw a rectangle with the mouse to create a new section. Sidebars are one click.
 - **Real CSS box model per element** — 4-direction margin and padding on every section, background fills, page margins via a visual box-model widget.
 - **Style presets + full token model** — one-click themes (Classic, Modern, Compact, Executive) on top of a JSON style model you can hand-edit in the `{ } Code` tab.
 - **Fonts** — built-in PDF fonts (Helvetica, Times, Courier) plus embedded TTFs (Lato, PT Serif); add your own in `public/fonts/` + `src/pdf/fonts.js`.
-- **Gallery & compare** — drop your old resume PDFs in `public/resumes/` and view them side-by-side with your draft to steal the best ideas.
-- **Private by design** — drafts persist in `localStorage`; Import/Export moves them as JSON.
+- **Gallery & compare** — upload your old resume PDFs (stored locally in your browser) and view them side-by-side with your draft to steal the best ideas.
+- **Multi-document** — create, rename, and delete PDF drafts; each is its own document stored locally.
+- **Private by design** — no cookies, no analytics, no accounts, no server. Your data stays on your device.
 
 ## Quick start
 
@@ -22,7 +27,7 @@ npm install
 npm run dev        # → http://localhost:4780
 ```
 
-Drop any reference resume PDFs into `public/resumes/` — they appear in the Gallery automatically (a manifest is generated on every `dev`/`build`).
+For local development, drop reference PDFs into `public/resumes/` and they appear in the Gallery automatically (a manifest is generated on every `dev`/`build`). In production, reference PDFs are added through the browser and stored in IndexedDB.
 
 ## How it works
 

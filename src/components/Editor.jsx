@@ -1,9 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-function Section({ label, children, defaultOpen = true }) {
+function Section({ label, children, defaultOpen = true, focusSignal = 0 }) {
   const [open, setOpen] = useState(defaultOpen)
+  const [flash, setFlash] = useState(false)
+  const ref = useRef(null)
+  // Selecting this section's block on the canvas/proof scrolls its form into
+  // view, expands it, and flashes it so the two panes stay visibly linked.
+  useEffect(() => {
+    if (!focusSignal) return
+    setOpen(true)
+    setFlash(true)
+    const raf = requestAnimationFrame(() =>
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    )
+    const t = setTimeout(() => setFlash(false), 1400)
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(t)
+    }
+  }, [focusSignal])
   return (
-    <section className="ed-section">
+    <section ref={ref} className={`ed-section ${flash ? 'focused' : ''}`}>
       <button className="ed-section-head" onClick={() => setOpen(!open)}>
         <span className="tick">{open ? '−' : '+'}</span> {label}
       </button>
@@ -25,7 +42,18 @@ function Field({ label, value, onChange, textarea = false, rows = 3 }) {
   )
 }
 
-export function Editor({ data, setData }) {
+// Block ids (as used on the canvas/proof) → which editor section holds
+// that content. Custom sections are edited in the Style inspector instead.
+const FOCUS_MAP = {
+  header: 'basics',
+  summary: 'summary',
+  experience: 'experience',
+  skills: 'skills',
+  education: 'education',
+}
+
+export function Editor({ data, setData, focus }) {
+  const sig = (key) => (focus && FOCUS_MAP[focus.id] === key ? focus.tick : 0)
   const set = (path, value) => {
     setData((prev) => {
       const next = structuredClone(prev)
@@ -72,7 +100,7 @@ export function Editor({ data, setData }) {
 
   return (
     <div className="editor">
-      <Section label="Basics">
+      <Section label="Basics" focusSignal={sig('basics')}>
         <Field label="Name" value={data.basics.name} onChange={(v) => set('basics.name', v)} />
         <Field label="Headline" value={data.basics.title} onChange={(v) => set('basics.title', v)} />
         <div className="grid2">
@@ -84,11 +112,11 @@ export function Editor({ data, setData }) {
         </div>
       </Section>
 
-      <Section label="Summary">
+      <Section label="Summary" focusSignal={sig('summary')}>
         <Field label="Professional summary" textarea rows={5} value={data.summary} onChange={(v) => set('summary', v)} />
       </Section>
 
-      <Section label="Experience">
+      <Section label="Experience" focusSignal={sig('experience')}>
         {data.experience.map((job, i) => (
           <div className="entry" key={i}>
             <div className="entry-head">
@@ -114,7 +142,7 @@ export function Editor({ data, setData }) {
         </button>
       </Section>
 
-      <Section label="Technical Skills">
+      <Section label="Technical Skills" focusSignal={sig('skills')}>
         {data.skills.map((sk, i) => (
           <div className="entry" key={i}>
             <div className="entry-head">
@@ -130,7 +158,7 @@ export function Editor({ data, setData }) {
         <button className="add" onClick={() => add('skills', { group: '', items: '' })}>+ Add skill group</button>
       </Section>
 
-      <Section label="Education">
+      <Section label="Education" focusSignal={sig('education')}>
         {data.education.map((ed, i) => (
           <div className="entry" key={i}>
             <div className="entry-head">

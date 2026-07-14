@@ -1,8 +1,8 @@
 {
-  "name": "resume-lab",
+  "name": "free-pdf-editor",
   "private": true,
-  "version": "1.0.0",
-  "description": "Free, open-source resume PDF editor — live PDF proofing, a CSS box-model style inspector, and a 12-column grid design canvas. Runs entirely in the browser.",
+  "version": "2.0.0",
+  "description": "Free PDF Editor — open-source resume PDF editor with live PDF proofing, a CSS box-model style inspector, and a 12-column grid design canvas. 100% in-browser: no cookies, no accounts, no server.",
   "license": "MIT",
   "keywords": ["resume", "cv", "pdf", "editor", "react-pdf", "resume-builder", "open-source"],
   "type": "module",
