@@ -8,6 +8,7 @@ import { DesignCanvas } from './components/DesignCanvas.jsx'
 import { PdfCanvas } from './components/PdfCanvas.jsx'
 import { initialResume } from './data/initialResume.js'
 import { defaultStyle, migrateStyle, BLOCK_META, isCustomId, gridOps } from './data/defaultStyle.js'
+import { TEMPLATES, templateDoc } from './data/templates.js'
 import { listPdfs, addPdf, deletePdf } from './lib/pdfStore.js'
 import { resolveProofText } from './lib/resolveProofText.js'
 import manifest from './data/manifest.json'
@@ -33,11 +34,10 @@ function loadJson(key, fallback) {
 
 const uid = () => `doc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
 
-const freshDoc = (name) => ({
+const freshDoc = (name, templateId = 'resume') => ({
   id: uid(),
   name,
-  data: structuredClone(initialResume),
-  style: migrateStyle(structuredClone(defaultStyle)),
+  ...templateDoc(name, templateId),
 })
 
 function loadStore() {
@@ -63,6 +63,7 @@ export default function App() {
   const [selection, setSelection] = useState({ type: 'page' })
   const [editorFocus, setEditorFocus] = useState(null) // {id, tick} → left pane scroll+flash
   const [inlineEdit, setInlineEdit] = useState(null) // { type, path, value, multiline, blockId, left, top, width }
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const previewRef = useRef(null)
 
   const activeDoc = store.docs.find((d) => d.id === store.activeId) ?? store.docs[0]
@@ -124,11 +125,12 @@ export default function App() {
     localStorage.setItem(DOCS_KEY, JSON.stringify(store))
   }, [store])
 
-  const newDoc = () => {
-    const d = freshDoc(`Untitled ${store.docs.length + 1}`)
+  const newDoc = (templateId) => {
+    const d = freshDoc(`Untitled ${store.docs.length + 1}`, templateId)
     setStore((s) => ({ docs: [...s.docs, d], activeId: d.id }))
     setSelection({ type: 'page' })
     setMode('compose')
+    setShowTemplatePicker(false)
   }
 
   const renameDoc = () => {
@@ -312,6 +314,14 @@ export default function App() {
     if (confirm('Reset this document to the sample content? Your edits will be lost.')) setData(structuredClone(initialResume))
   }
 
+  const clearDoc = () => {
+    if (confirm('Clear this document to a blank resume? Your edits will be lost.')) {
+      const t = templateDoc(activeDoc.name, 'resume')
+      setData(t.data)
+      setStyle(t.style)
+    }
+  }
+
   return (
     <div className="app">
       <header className="topbar">
@@ -327,7 +337,7 @@ export default function App() {
             ))}
           </select>
           <button title="Rename this document" onClick={renameDoc}>✎</button>
-          <button title="New document" onClick={newDoc}>＋</button>
+          <button title="New document" onClick={() => setShowTemplatePicker(true)}>＋</button>
           <button title="Delete this document" className="danger" onClick={deleteDoc}>🗑</button>
         </div>
         <nav className="modes">
@@ -357,6 +367,7 @@ export default function App() {
           </label>
           <button className="ghost" onClick={exportJson}>Export</button>
           <button className="ghost" onClick={reset}>Reset</button>
+          <button className="ghost" onClick={clearDoc}>Clear</button>
           <button className="primary" onClick={download}>↓ Download PDF</button>
         </div>
       </header>
@@ -534,6 +545,31 @@ export default function App() {
               <button onClick={() => setLightbox(null)}>× close</button>
             </div>
             <PdfCanvas file={lightbox.file} width={760} allPages />
+          </div>
+        </div>
+      )}
+
+      {showTemplatePicker && (
+        <div className="lightbox" onClick={() => setShowTemplatePicker(false)}>
+          <div className="template-picker" onClick={(e) => e.stopPropagation()}>
+            <div className="lightbox-head">
+              <strong>Start from scratch</strong>
+              <button onClick={() => setShowTemplatePicker(false)}>× close</button>
+            </div>
+            <p className="tp-hint">Pick a blank template. You can still edit everything — sections, layout, fonts, colors — afterwards.</p>
+            <div className="tp-grid">
+              {TEMPLATES.map((t) => (
+                <button
+                  key={t.id}
+                  className="tp-card"
+                  onClick={() => newDoc(t.id)}
+                >
+                  <span className="tp-icon">{t.icon}</span>
+                  <span className="tp-name">{t.name}</span>
+                  <span className="tp-desc">Blank {t.name.toLowerCase()} template</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

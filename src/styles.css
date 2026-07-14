@@ -329,6 +329,61 @@ body {
 }
 .lightbox-head button:hover { border-color: var(--red); color: var(--red); }
 
+/* ── template picker ── */
+.template-picker {
+  background: var(--paper);
+  padding: 18px 22px 26px;
+  max-width: 560px;
+  width: 100%;
+  margin: auto 0;
+  align-self: center;
+}
+.tp-hint {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(26, 24, 23, 0.65);
+  margin-bottom: 18px;
+}
+.tp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.tp-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.12s;
+  text-align: center;
+}
+.tp-card:hover {
+  border-color: var(--red);
+  box-shadow: 4px 4px 0 var(--red);
+  transform: translate(-2px, -2px);
+}
+.tp-icon {
+  font-size: 28px;
+  color: var(--red);
+  line-height: 1;
+}
+.tp-name {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  font-style: italic;
+}
+.tp-desc {
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+  color: rgba(26, 24, 23, 0.55);
+  text-transform: lowercase;
+}
+
 /* ── style inspector ── */
 .style-toggle.lit { color: var(--red) !important; text-decoration-color: var(--red); }
 
