@@ -6,7 +6,7 @@
 - Uploaded reference PDFs live in your browser's `IndexedDB`
 - Nothing is uploaded to any server; we collect no information about you
 
-**▶ Try it live: [resume-lab-two.vercel.app](https://resume-lab-two.vercel.app)** — no install, no signup.
+**▶ Try it live: [free-pdf-editor-theta.vercel.app](https://free-pdf-editor-theta.vercel.app)** — no install, no signup.
 
 ## Features
 
