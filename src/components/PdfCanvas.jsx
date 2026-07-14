@@ -12,7 +12,8 @@ export function PdfCanvas({ file, width, allPages = false, className = '', onTex
     ? (e) => {
         const span = e.target.closest('.react-pdf__Page__textContent span, .textLayer span')
         const text = span?.textContent?.trim()
-        if (text) onTextClick(text)
+        const rect = span?.getBoundingClientRect()
+        if (text) onTextClick(text, rect)
       }
     : undefined
 

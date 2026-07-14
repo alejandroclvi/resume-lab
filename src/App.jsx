@@ -9,6 +9,7 @@ import { PdfCanvas } from './components/PdfCanvas.jsx'
 import { initialResume } from './data/initialResume.js'
 import { defaultStyle, migrateStyle, BLOCK_META, isCustomId, gridOps } from './data/defaultStyle.js'
 import { listPdfs, addPdf, deletePdf } from './lib/pdfStore.js'
+import { resolveProofText } from './lib/resolveProofText.js'
 import manifest from './data/manifest.json'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -61,6 +62,8 @@ export default function App() {
   const [view, setView] = useState('proof') // proof | design (center pane)
   const [selection, setSelection] = useState({ type: 'page' })
   const [editorFocus, setEditorFocus] = useState(null) // {id, tick} → left pane scroll+flash
+  const [inlineEdit, setInlineEdit] = useState(null) // { type, path, value, multiline, blockId, left, top, width }
+  const previewRef = useRef(null)
 
   const activeDoc = store.docs.find((d) => d.id === store.activeId) ?? store.docs[0]
   const { data, style } = activeDoc
@@ -80,6 +83,42 @@ export default function App() {
   // leave the grid in an invalid state (missing blocks, unknown ids).
   const setStyle = (updater) =>
     patchActive('style', (prev) => migrateStyle(typeof updater === 'function' ? updater(prev) : updater))
+
+  // Apply an inline edit to either data or style by dotted path.
+  const applyEdit = (type, path, value) => {
+    const keys = path.split('.')
+    const setter = type === 'data' ? setData : setStyle
+    setter((prev) => {
+      const next = structuredClone(prev)
+      let obj = next
+      for (const k of keys.slice(0, -1)) obj = obj[Array.isArray(obj) ? Number(k) : k]
+      obj[keys.at(-1)] = value
+      return next
+    })
+  }
+
+  const commitInlineEdit = () => {
+    if (!inlineEdit) return
+    applyEdit(inlineEdit.type, inlineEdit.path, inlineEdit.value)
+    setInlineEdit(null)
+  }
+
+  const startInlineEdit = (text, rect) => {
+    const resolved = resolveProofText(text, data, style)
+    if (!resolved) return
+    const paneRect = previewRef.current?.getBoundingClientRect()
+    if (!paneRect) return
+    setInlineEdit({
+      ...resolved,
+      left: rect.left - paneRect.left,
+      top: rect.top - paneRect.top,
+      width: rect.width,
+    })
+    if (resolved.blockId) {
+      setSelection({ type: 'block', id: resolved.blockId })
+      setShowStyle(true)
+    }
+  }
 
   useEffect(() => {
     localStorage.setItem(DOCS_KEY, JSON.stringify(store))
@@ -188,31 +227,10 @@ export default function App() {
       ? (data.customSections || []).find((c) => c.id === id)?.title || 'Section'
       : BLOCK_META[id].label
 
-  // Click-to-select on the rendered proof: map the clicked text-layer string
-  // back to the section whose content contains it.
-  const classifyProofText = (text) => {
-    const t = text.toLowerCase().replace(/\s+/g, ' ').trim()
-    if (t.length < 2) return null
-    const corpora = [
-      ...(data.customSections || []).map((c) => [c.id, `${c.title} ${c.body}`]),
-      ['education', [style.sections.education?.title, ...data.education.flatMap((e) => [e.degree, e.school, e.dates])].join(' ')],
-      ['skills', [style.sections.skills?.title, ...data.skills.flatMap((s) => [s.group, s.items])].join(' ')],
-      ['experience', [style.sections.experience?.title, ...data.experience.flatMap((j) => [j.role, j.company, j.dates, ...j.bullets])].join(' ')],
-      ['summary', `${style.sections.summary?.title} ${data.summary}`],
-      ['header', Object.values(data.basics).join(' ')],
-    ]
-    for (const [id, corpus] of corpora) {
-      if (corpus.toLowerCase().replace(/\s+/g, ' ').includes(t)) return id
-    }
-    return null
-  }
-
-  const onProofTextClick = (text) => {
-    const id = classifyProofText(text)
-    if (id) {
-      setSelection({ type: 'block', id })
-      setShowStyle(true)
-    }
+  // Click-to-edit on the rendered proof: clicking any text opens a floating
+  // editor at that exact spot, and also selects the block in the left pane.
+  const onProofTextClick = (text, rect) => {
+    startInlineEdit(text, rect)
   }
   const [draftBlob, setDraftBlob] = useState(null)
   const [pageCount, setPageCount] = useState(null)
@@ -348,7 +366,7 @@ export default function App() {
           <div className="pane pane-editor">
             <Editor data={data} setData={setData} focus={editorFocus} />
           </div>
-          <div className="pane pane-preview">
+          <div className="pane pane-preview" ref={previewRef}>
             <div className="preview-chrome">
               <div className="view-switch">
                 <button className={view === 'design' ? 'on' : ''} onClick={() => setView('design')} title="Blueprint grid — arrange sections">
@@ -399,6 +417,46 @@ export default function App() {
               <PdfCanvas file={draftBlob} width={620} allPages onTextClick={onProofTextClick} />
             ) : (
               <div className="pdf-loading">generating…</div>
+            )}
+
+            {inlineEdit && (
+              <div
+                className="inline-edit"
+                style={{ left: inlineEdit.left, top: inlineEdit.top, minWidth: Math.max(inlineEdit.width, 140) }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {inlineEdit.multiline ? (
+                  <textarea
+                    autoFocus
+                    value={inlineEdit.value}
+                    rows={Math.max(2, inlineEdit.value.split('\n').length)}
+                    onChange={(e) => setInlineEdit((p) => ({ ...p, value: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault()
+                        commitInlineEdit()
+                      }
+                      if (e.key === 'Escape') setInlineEdit(null)
+                    }}
+                    onBlur={commitInlineEdit}
+                  />
+                ) : (
+                  <input
+                    autoFocus
+                    type="text"
+                    value={inlineEdit.value}
+                    onChange={(e) => setInlineEdit((p) => ({ ...p, value: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        commitInlineEdit()
+                      }
+                      if (e.key === 'Escape') setInlineEdit(null)
+                    }}
+                    onBlur={commitInlineEdit}
+                  />
+                )}
+              </div>
             )}
           </div>
           {showStyle && (

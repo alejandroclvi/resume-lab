@@ -919,12 +919,39 @@ body {
 /* layers chips for off-page blocks */
 .layers button.off-page { opacity: 0.45; border-style: dashed; }
 
-/* click-to-select on the rendered proof */
+/* click-to-edit on the rendered proof */
 .click-proof .react-pdf__Page__textContent span { cursor: pointer; }
 .click-proof .react-pdf__Page__textContent span:hover {
   background: rgba(217, 58, 34, 0.22);
   border-radius: 1px;
 }
+
+.inline-edit {
+  position: absolute;
+  z-index: 20;
+  background: #fff;
+  border: 2px solid var(--red);
+  box-shadow: 4px 4px 0 rgba(26, 24, 23, 0.25);
+  padding: 3px;
+  border-radius: 2px;
+}
+.inline-edit input,
+.inline-edit textarea {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  border: none;
+  background: var(--cream);
+  color: var(--ink);
+  padding: 6px 8px;
+  width: 100%;
+  min-width: 180px;
+  resize: none;
+  outline: none;
+}
+.inline-edit input:focus,
+.inline-edit textarea:focus { background: #fff; }
+.inline-edit textarea { min-height: 64px; }
 
 /* cell edge-resize handle */
 .cell-resize {
