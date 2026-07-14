@@ -274,6 +274,10 @@ function BlockInspector({ style, setStyle, set, blockId, data, setData, setSelec
     setData((prev) => ({ ...prev, customSections: (prev.customSections || []).filter((c) => c.id !== blockId) }))
   }
 
+  const hideBlock = () => setStyle((p) => gridOps.unplaceBlock(p, blockId))
+  const showBlock = () => setStyle((p) => gridOps.moveBlockToCell(p, blockId, p.grid.rows.length - 1, 0))
+  const onPage = !!findBlock(style.grid, blockId)
+
   return (
     <>
       {custom && cs && (
@@ -291,6 +295,23 @@ function BlockInspector({ style, setStyle, set, blockId, data, setData, setSelec
           />
         </Group>
       )}
+
+      <Group label="Visibility">
+        <Row label="On page">
+          <button
+            className={`sp-apply ${onPage ? 'on' : ''}`}
+            title={onPage ? 'Section is visible on the page' : 'Section is hidden from the page'}
+            onClick={() => (onPage ? hideBlock() : showBlock())}
+          >
+            {onPage ? '⊡ Visible' : '⊟ Hidden'}
+          </button>
+        </Row>
+        {!custom && (
+          <Row label="Block" title="Remove from the page without deleting data">
+            <button className="sp-ghost" onClick={hideBlock}>Hide from page</button>
+          </Row>
+        )}
+      </Group>
 
       <PlacementGroup style={style} setStyle={setStyle} blockId={blockId} />
 
@@ -376,11 +397,9 @@ function BlockInspector({ style, setStyle, set, blockId, data, setData, setSelec
             </Group>
           )}
           <BoxGroup cfg={cfg} blockId={blockId} set={set} />
-          {custom && (
-            <button className="sp-reset sp-delete" onClick={deleteBlock}>
-              ✗ Delete this section
-            </button>
-          )}
+          <button className="sp-reset sp-delete" onClick={deleteBlock}>
+            ✗ Delete this section
+          </button>
         </>
       )}
     </>

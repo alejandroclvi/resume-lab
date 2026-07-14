@@ -54,10 +54,10 @@ export const defaultStyle = {
   // box model: 4-direction margin + padding.
   sections: {
     header: { background: '', margin: box(), padding: box() },
-    summary: { title: 'Summary', showTitle: true, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() },
-    experience: { title: 'Experience', showTitle: true, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() },
-    skills: { title: 'Technical Skills', showTitle: true, spacingBefore: null, textSize: null, titleColor: '', mode: 'auto', background: '', margin: box(), padding: box() }, // auto | table | stacked
-    education: { title: 'Education', showTitle: true, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() },
+    summary: { title: 'Summary', showTitle: true, hidden: false, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() },
+    experience: { title: 'Experience', showTitle: true, hidden: false, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() },
+    skills: { title: 'Technical Skills', showTitle: true, hidden: false, spacingBefore: null, textSize: null, titleColor: '', mode: 'auto', background: '', margin: box(), padding: box() }, // auto | table | stacked
+    education: { title: 'Education', showTitle: true, hidden: false, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() },
   },
   rule: { show: true, thickness: 1.2, color: '' }, // under the header; empty = type.color
   bullets: {
@@ -312,7 +312,7 @@ export const gridOps = {
 export const isCustomId = (id) => /^custom-/.test(id)
 
 export function customSectionDefaults() {
-  return { showTitle: true, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() }
+  return { showTitle: true, hidden: false, spacingBefore: null, textSize: null, titleColor: '', background: '', margin: box(), padding: box() }
 }
 
 // Upgrades any older saved style (v1 layout.mode era, missing keys) to the

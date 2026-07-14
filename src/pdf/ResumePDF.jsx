@@ -192,43 +192,52 @@ export function ResumePDF({ data, styleTokens, showBorders = false }) {
     return <Text style={titleStyle(st, s, cfg)}>{text || cfg?.title || id}</Text>
   }
 
-  const Summary = () =>
-    summary ? (
+  const Summary = () => {
+    const cfg = st.sections.summary
+    if (cfg?.hidden) return null
+    return summary ? (
       <View style={{ ...wrapStyle('summary'), position: 'relative' }}>
         <SectionTitle id="summary" />
         <Text>{summary}</Text>
         <BorderOverlay id="summary" />
       </View>
     ) : null
+  }
 
-  const Experience = () => (
-    <View style={{ ...wrapStyle('experience'), position: 'relative' }}>
-      {experience.length > 0 && <SectionTitle id="experience" />}
-      {experience.map((job, i) => (
-        <View key={i} wrap={false} style={{ position: 'relative' }}>
-          <View style={s.jobHead}>
-            <Text style={s.role}>{job.role}</Text>
-            <Text style={s.dates}>{job.dates}</Text>
-          </View>
-          <Text style={s.company}>{job.company}</Text>
-          {job.bullets.filter(Boolean).map((b, j) => (
-            <View key={j} style={s.bulletRow}>
-              <Text style={s.bulletMark}>{st.bullets.marker}</Text>
-              <Text style={s.bulletText}>{b}</Text>
+  const Experience = () => {
+    const cfg = st.sections.experience
+    if (cfg?.hidden) return null
+    return (
+      <View style={{ ...wrapStyle('experience'), position: 'relative' }}>
+        {experience.length > 0 && <SectionTitle id="experience" />}
+        {experience.map((job, i) => (
+          <View key={i} wrap={false} style={{ position: 'relative' }}>
+            <View style={s.jobHead}>
+              <Text style={s.role}>{job.role}</Text>
+              <Text style={s.dates}>{job.dates}</Text>
             </View>
-          ))}
-          <CustomFields fields={job.customFields} />
-          <BorderOverlay id={`experience-${i}`} />
-        </View>
-      ))}
-      <BorderOverlay id="experience" />
-    </View>
-  )
+            <Text style={s.company}>{job.company}</Text>
+            {job.bullets.filter(Boolean).map((b, j) => (
+              <View key={j} style={s.bulletRow}>
+                <Text style={s.bulletMark}>{st.bullets.marker}</Text>
+                <Text style={s.bulletText}>{b}</Text>
+              </View>
+            ))}
+            <CustomFields fields={job.customFields} />
+            <BorderOverlay id={`experience-${i}`} />
+          </View>
+        ))}
+        <BorderOverlay id="experience" />
+      </View>
+    )
+  }
 
   // stacked (label above items) in narrow cells, table in wide ones —
   // unless the section's mode override says otherwise.
   const Skills = ({ span }) => {
-    const mode = st.sections.skills?.mode || 'auto'
+    const cfg = st.sections.skills
+    if (cfg?.hidden) return null
+    const mode = cfg?.mode || 'auto'
     const stacked = mode === 'stacked' || (mode === 'auto' && span <= 6)
     return (
       <View style={{ ...wrapStyle('skills'), position: 'relative' }}>
@@ -259,39 +268,44 @@ export function ResumePDF({ data, styleTokens, showBorders = false }) {
     )
   }
 
-  const Education = ({ span }) => (
-    <View style={{ ...wrapStyle('education'), position: 'relative' }}>
-      {education.length > 0 && <SectionTitle id="education" />}
-      {education.map((ed, i) => (
-        <View key={i} style={{ position: 'relative' }}>
-          {span <= 6 ? (
-            <View style={s.skillBlock}>
-              <Text style={s.role}>{ed.degree}</Text>
-              <Text style={s.company}>{ed.school}</Text>
-              <Text style={s.dates}>{ed.dates}</Text>
-            </View>
-          ) : (
-            <>
-              <View style={s.eduRow}>
+  const Education = ({ span }) => {
+    const cfg = st.sections.education
+    if (cfg?.hidden) return null
+    return (
+      <View style={{ ...wrapStyle('education'), position: 'relative' }}>
+        {education.length > 0 && <SectionTitle id="education" />}
+        {education.map((ed, i) => (
+          <View key={i} style={{ position: 'relative' }}>
+            {span <= 6 ? (
+              <View style={s.skillBlock}>
                 <Text style={s.role}>{ed.degree}</Text>
+                <Text style={s.company}>{ed.school}</Text>
                 <Text style={s.dates}>{ed.dates}</Text>
               </View>
-              <Text style={s.company}>{ed.school}</Text>
-            </>
-          )}
-          <CustomFields fields={ed.customFields} />
-          <BorderOverlay id={`education-${i}`} />
-        </View>
-      ))}
-      <BorderOverlay id="education" />
-    </View>
-  )
+            ) : (
+              <>
+                <View style={s.eduRow}>
+                  <Text style={s.role}>{ed.degree}</Text>
+                  <Text style={s.dates}>{ed.dates}</Text>
+                </View>
+                <Text style={s.company}>{ed.school}</Text>
+              </>
+            )}
+            <CustomFields fields={ed.customFields} />
+            <BorderOverlay id={`education-${i}`} />
+          </View>
+        ))}
+        <BorderOverlay id="education" />
+      </View>
+    )
+  }
 
   // Custom blocks (drawn on the canvas): title + body where lines starting
   // with "- " render as bullets.
   const Custom = ({ id }) => {
     const cs = (data.customSections || []).find((c) => c.id === id)
-    if (!cs) return null
+    const cfg = st.sections[id]
+    if (!cs || cfg?.hidden) return null
     const lines = (cs.body || '').split('\n').filter((l) => l.trim())
     return (
       <View style={{ ...wrapStyle(id), position: 'relative' }}>
