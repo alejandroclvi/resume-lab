@@ -1,0 +1,12 @@
+node_modules/
+dist/
+
+# generated on every dev/build
+src/data/manifest.json
+
+# your own resume collection & personal data — never committed
+public/resumes/*
+!public/resumes/.gitkeep
+personal/
+
+.DS_Store
