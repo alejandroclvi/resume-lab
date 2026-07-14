@@ -212,8 +212,14 @@ body {
 
 /* ── dynamic fields inside a block ── */
 .dynamic-fields { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
-.dyn-field { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
-.dyn-field input {
+.dyn-field {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.dyn-field input, .dyn-field select {
   font-family: var(--mono);
   font-size: 11.5px;
   padding: 6px 8px;
@@ -221,18 +227,27 @@ body {
   background: var(--cream);
   color: var(--ink);
 }
-.dyn-field input:focus { outline: none; border-color: var(--red); background: #fff; }
-.dyn-label { flex: 0 0 130px; }
-.dyn-value { flex: 1; }
-.dyn-remove {
+.dyn-field input:focus, .dyn-field select:focus { outline: none; border-color: var(--red); background: #fff; }
+.dyn-label { flex: 1 1 120px; min-width: 120px; }
+.dyn-value { flex: 2 1 160px; min-width: 160px; }
+.dyn-render { flex: 0 0 90px; cursor: pointer; }
+.dyn-controls {
+  display: flex;
+  gap: 3px;
+  flex: 0 0 auto;
+}
+.dyn-controls button {
   width: 24px; height: 24px;
   border: 1px solid var(--line);
   background: #fff;
   cursor: pointer;
-  color: rgba(26, 24, 23, 0.45);
-  font-size: 13px;
+  color: var(--ink);
+  font-size: 12px;
   line-height: 1;
 }
+.dyn-controls button:disabled { opacity: 0.35; cursor: default; }
+.dyn-controls button:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
+.dyn-remove { color: rgba(26, 24, 23, 0.45); }
 .dyn-remove:hover { border-color: var(--red); color: var(--red); }
 .dyn-add {
   font-family: var(--mono);
@@ -245,6 +260,12 @@ body {
   margin-top: 4px;
 }
 .dyn-add:hover { border-color: var(--red); color: var(--red); }
+.dyn-hint {
+  font-size: 9.5px;
+  color: rgba(26, 24, 23, 0.55);
+  margin-top: 6px;
+  line-height: 1.4;
+}
 
 /* ── pdf rendering ── */
 .pdf-canvas { display: flex; flex-direction: column; align-items: center; gap: 12px; }

@@ -107,11 +107,14 @@ export function ResumePDF({ data, styleTokens }) {
     return w
   }
 
-  const CustomFields = ({ fields }) => {
-    const list = (fields || []).filter((f) => f.label?.trim() || f.value?.trim())
+  const CustomFields = ({ fields, area = 'inline' }) => {
+    const list = (fields || []).filter((f) => {
+      const render = f.render || 'inline'
+      return render === area && (f.label?.trim() || f.value?.trim())
+    })
     if (!list.length) return null
     return (
-      <View style={{ marginTop: 4 }}>
+      <View style={{ marginTop: area === 'header' ? 4 : 0 }}>
         {list.map((f, i) => (
           <View key={i} style={s.customField}>
             {f.label?.trim() && <Text style={s.customLabel}>{f.label.trim()}: </Text>}
@@ -134,7 +137,7 @@ export function ResumePDF({ data, styleTokens }) {
           </Text>
         ))}
       </View>
-      <CustomFields fields={basics.customFields} />
+      <CustomFields fields={basics.customFields} area="header" />
       <View style={s.rule} />
     </View>
   )

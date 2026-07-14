@@ -29,7 +29,7 @@ function Section({ label, children, defaultOpen = true, focusSignal = 0 }) {
   )
 }
 
-function Field({ label, value, onChange, textarea = false, rows = 3 }) {
+function Field({ label, value, onChange, textarea = false, rows = 3, multilineKeyCommit = false }) {
   return (
     <label className="field">
       <span className="field-label">{label}</span>
@@ -43,12 +43,27 @@ function Field({ label, value, onChange, textarea = false, rows = 3 }) {
 }
 
 // User-defined fields inside a block. Each has a label + value; both are
-// editable and render in the PDF.
+// editable, reorderable, and render in the PDF. A user can also pick *where*
+// the field renders (inline, header area, hidden for storage).
 function DynamicFields({ items, onChange }) {
   const ensure = () => items || []
   const update = (idx, patch) => onChange(ensure().map((f, i) => (i === idx ? { ...f, ...patch } : f)))
-  const add = () => onChange([...ensure(), { label: '', value: '' }])
+  const add = () => onChange([...ensure(), { label: '', value: '', render: 'inline' }])
   const remove = (idx) => onChange(ensure().filter((_, i) => i !== idx))
+  const move = (idx, dir) => {
+    const list = ensure()
+    const j = idx + dir
+    if (j < 0 || j >= list.length) return
+    const next = [...list]
+    ;[next[idx], next[j]] = [next[j], next[idx]]
+    onChange(next)
+  }
+
+  const renderOptions = [
+    { value: 'inline', label: 'inline' },
+    { value: 'header', label: 'header' },
+    { value: 'hidden', label: 'hidden' },
+  ]
 
   return (
     <div className="dynamic-fields">
@@ -66,10 +81,25 @@ function DynamicFields({ items, onChange }) {
             value={f.value}
             onChange={(e) => update(i, { value: e.target.value })}
           />
-          <button className="dyn-remove" title="Remove field" onClick={() => remove(i)}>×</button>
+          <select
+            className="dyn-render"
+            value={f.render || 'inline'}
+            onChange={(e) => update(i, { render: e.target.value })}
+            title="Where this field renders"
+          >
+            {renderOptions.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+          <div className="dyn-controls">
+            <button title="Move up" onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
+            <button title="Move down" onClick={() => move(i, 1)} disabled={i === ensure().length - 1}>↓</button>
+            <button className="dyn-remove" title="Remove field" onClick={() => remove(i)}>×</button>
+          </div>
         </div>
       ))}
       <button className="dyn-add" onClick={add}>+ Add field</button>
+      <p className="dyn-hint">Render: inline (with the entry), header (only for basics), or hidden (stored, not printed).</p>
     </div>
   )
 }
