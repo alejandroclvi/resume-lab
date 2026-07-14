@@ -295,6 +295,11 @@ export default function App() {
 
       {mode === 'gallery' && (
         <main className="gallery">
+          {manifest.length === 0 && (
+            <div className="pdf-loading">
+              No reference PDFs yet — drop your old resumes into <code>public/resumes/</code> and restart the dev server to browse them here.
+            </div>
+          )}
           {manifest.map((r) => (
             <figure key={r.file} className="card" onClick={() => setLightbox(r)}>
               <div className="thumb">

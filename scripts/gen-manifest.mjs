@@ -8,6 +8,8 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const dir = join(root, 'public', 'resumes')
 const out = join(root, 'src', 'data', 'manifest.json')
 
+mkdirSync(dir, { recursive: true })
+
 const files = readdirSync(dir)
   .filter((f) => f.toLowerCase().endsWith('.pdf'))
   .sort()

@@ -2,6 +2,8 @@
 
 **A free, open-source resume PDF editor.** Design your resume like a document proofing desk: edit content in forms, style every element with a real CSS box model, arrange sections on a 12-column grid canvas — and download a true, ATS-friendly PDF. No accounts, no watermarks, no server: everything runs in your browser and your data never leaves your machine.
 
+**▶ Try it live: [resume-lab-two.vercel.app](https://resume-lab-two.vercel.app)** — no install, no signup.
+
 ## Features
 
 - **Live PDF proof** — the preview *is* the PDF (rendered with `@react-pdf/renderer`), not an HTML approximation. What you see is byte-for-byte what you download.

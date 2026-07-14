@@ -1,0 +1,9 @@
+node_modules
+dist
+.DS_Store
+
+# personal data — never uploaded to Vercel
+personal
+public/resumes/*
+!public/resumes/.gitkeep
+src/data/manifest.json

@@ -10,3 +10,4 @@ public/resumes/*
 personal/
 
 .DS_Store
+.vercel
