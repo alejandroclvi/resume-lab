@@ -5,7 +5,7 @@ import { BLOCK_META, gridOps, isCustomId } from '../data/defaultStyle.js'
 // Blocks are clickable (→ contextual inspector), draggable between cells,
 // cells resize by their right edge, and dragging a rectangle on empty canvas
 // DRAWS a new block snapped to the 12-column grid.
-export function DesignCanvas({ style, setStyle, data, setData, selection, setSelection }) {
+export function DesignCanvas({ style, setStyle, data, setData, selection, setSelection, showBorders = true }) {
   const [dragging, setDragging] = useState(null) // block id being dragged
   const [dropTarget, setDropTarget] = useState(null) // `${ri}:${ci}`
   const [ghost, setGhost] = useState(null) // {left,top,width,height} px — draw preview
@@ -159,7 +159,7 @@ export function DesignCanvas({ style, setStyle, data, setData, selection, setSel
     (kind === 'block' ? selection.id === a : selection.row === a && selection.cell === b)
 
   return (
-    <div className="design-wrap">
+    <div className={`design-wrap ${showBorders ? '' : 'no-borders'}`}>
       <div className="design-toolbar">
         <span className="dt-hint">blueprint — not to scale · click to select · drag between cells · draw to create</span>
         <div className="dt-actions">

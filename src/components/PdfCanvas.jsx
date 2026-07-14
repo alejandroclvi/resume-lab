@@ -4,7 +4,7 @@ import { Document, Page } from 'react-pdf'
 // Renders a PDF (url or blob) as canvas pages with optional pager.
 // When onTextClick is given, clicks on the PDF's text layer report the
 // clicked string — used for click-to-select on the live proof.
-export function PdfCanvas({ file, width, allPages = false, className = '', onTextClick }) {
+export function PdfCanvas({ file, width, allPages = false, className = '', onTextClick, showBorders = true }) {
   const [numPages, setNumPages] = useState(null)
   const [pageNum, setPageNum] = useState(1)
 
@@ -18,7 +18,7 @@ export function PdfCanvas({ file, width, allPages = false, className = '', onTex
     : undefined
 
   return (
-    <div className={`pdf-canvas ${onTextClick ? 'click-proof' : ''} ${className}`} onClick={handleClick}>
+    <div className={`pdf-canvas ${onTextClick ? 'click-proof' : ''} ${showBorders ? '' : 'hide-borders'} ${className}`} onClick={handleClick}>
       <Document
         file={file}
         onLoadSuccess={({ numPages: n }) => {

@@ -64,6 +64,7 @@ export default function App() {
   const [editorFocus, setEditorFocus] = useState(null) // {id, tick} → left pane scroll+flash
   const [inlineEdit, setInlineEdit] = useState(null) // { type, path, value, multiline, blockId, left, top, width }
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [showBorders, setShowBorders] = useState(true) // toggle block/cell outlines in Design + Proof
   const previewRef = useRef(null)
 
   const activeDoc = store.docs.find((d) => d.id === store.activeId) ?? store.docs[0]
@@ -265,7 +266,7 @@ export default function App() {
     const seq = ++genSeq.current
     const t = setTimeout(async () => {
       try {
-        const blob = await pdf(<ResumePDF data={data} styleTokens={style} />).toBlob()
+        const blob = await pdf(<ResumePDF data={data} styleTokens={style} showBorders={showBorders} />).toBlob()
         if (genSeq.current === seq) setDraftBlob(blob)
       } catch (e) {
         console.error('pdf gen failed', e)
@@ -275,7 +276,7 @@ export default function App() {
   }, [data, style])
 
   const download = async () => {
-    const blob = await pdf(<ResumePDF data={data} styleTokens={style} />).toBlob()
+    const blob = await pdf(<ResumePDF data={data} styleTokens={style} showBorders={showBorders} />).toBlob()
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -361,6 +362,15 @@ export default function App() {
               ◧ Style
             </button>
           )}
+          {mode === 'compose' && (
+            <button
+              className={`ghost border-toggle ${showBorders ? 'lit' : ''}`}
+              title="Toggle block/cell borders on the canvas and proof"
+              onClick={() => setShowBorders(!showBorders)}
+            >
+              {showBorders ? '⊡ borders on' : '⊟ borders off'}
+            </button>
+          )}
           <label className="ghost" title="Import a saved draft JSON">
             Import
             <input type="file" accept=".json" onChange={importJson} hidden />
@@ -423,9 +433,10 @@ export default function App() {
                 setData={setData}
                 selection={selection}
                 setSelection={setSelection}
+                showBorders={showBorders}
               />
             ) : draftBlob ? (
-              <PdfCanvas file={draftBlob} width={620} allPages onTextClick={onProofTextClick} />
+              <PdfCanvas file={draftBlob} width={620} allPages onTextClick={onProofTextClick} showBorders={showBorders} />
             ) : (
               <div className="pdf-loading">generating…</div>
             )}

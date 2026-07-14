@@ -81,14 +81,15 @@ function titleStyle(st, s, cfg) {
   }
 }
 
-export function ResumePDF({ data, styleTokens }) {
+export function ResumePDF({ data, styleTokens, showBorders = false }) {
   const st = styleTokens || defaultStyle
   const s = makeStyles(st)
   const { basics, summary, experience, skills, education } = data
   const contacts = [basics.location, basics.phone, basics.email, basics.linkedin, basics.github].filter(Boolean)
 
   // Every block gets a wrapper carrying its override tokens: text size,
-  // background fill, and the full box model (margin + padding, 4 sides).
+  // background fill, the full box model (margin + padding, 4 sides), and
+  // an optional debug border that prints in the PDF when borders are toggled on.
   const wrapStyle = (id) => {
     const cfg = st.sections[id] || {}
     const w = {}
@@ -106,6 +107,48 @@ export function ResumePDF({ data, styleTokens }) {
     if (pd.left) w.paddingLeft = pd.left
     return w
   }
+
+  const debugBorder = (id) => {
+    const cfg = st.sections[id] || {}
+    const c = st.accent
+    return {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderWidth: 1,
+      borderColor: c,
+      borderStyle: 'dashed',
+      opacity: 0.8,
+      padding: 0,
+      margin: 0,
+      zIndex: -1,
+    }
+  }
+
+  const BorderOverlay = ({ id }) =>
+    showBorders ? (
+      <View
+        fixed={false}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderWidth: 1,
+          borderColor: st.accent,
+          borderStyle: 'dashed',
+          opacity: 0.75,
+          pointerEvents: 'none',
+        }}
+      >
+        <Text style={{ fontSize: 6, color: st.accent, position: 'absolute', top: -8, right: 4 }}>
+          {id}
+        </Text>
+      </View>
+    ) : null
 
   const CustomFields = ({ fields, area = 'inline' }) => {
     const list = (fields || []).filter((f) => {
@@ -126,7 +169,7 @@ export function ResumePDF({ data, styleTokens }) {
   }
 
   const Header = () => (
-    <View style={wrapStyle('header')}>
+    <View style={{ ...wrapStyle('header'), position: 'relative' }}>
       <Text style={s.name}>{basics.name}</Text>
       {basics.title ? <Text style={s.title}>{basics.title}</Text> : null}
       <View style={s.contactRow}>
@@ -139,6 +182,7 @@ export function ResumePDF({ data, styleTokens }) {
       </View>
       <CustomFields fields={basics.customFields} area="header" />
       <View style={s.rule} />
+      <BorderOverlay id="header" />
     </View>
   )
 
@@ -150,17 +194,18 @@ export function ResumePDF({ data, styleTokens }) {
 
   const Summary = () =>
     summary ? (
-      <View style={wrapStyle('summary')}>
+      <View style={{ ...wrapStyle('summary'), position: 'relative' }}>
         <SectionTitle id="summary" />
         <Text>{summary}</Text>
+        <BorderOverlay id="summary" />
       </View>
     ) : null
 
   const Experience = () => (
-    <View style={wrapStyle('experience')}>
+    <View style={{ ...wrapStyle('experience'), position: 'relative' }}>
       {experience.length > 0 && <SectionTitle id="experience" />}
       {experience.map((job, i) => (
-        <View key={i} wrap={false}>
+        <View key={i} wrap={false} style={{ position: 'relative' }}>
           <View style={s.jobHead}>
             <Text style={s.role}>{job.role}</Text>
             <Text style={s.dates}>{job.dates}</Text>
@@ -173,8 +218,10 @@ export function ResumePDF({ data, styleTokens }) {
             </View>
           ))}
           <CustomFields fields={job.customFields} />
+          <BorderOverlay id={`experience-${i}`} />
         </View>
       ))}
+      <BorderOverlay id="experience" />
     </View>
   )
 
@@ -184,17 +231,18 @@ export function ResumePDF({ data, styleTokens }) {
     const mode = st.sections.skills?.mode || 'auto'
     const stacked = mode === 'stacked' || (mode === 'auto' && span <= 6)
     return (
-      <View style={wrapStyle('skills')}>
+      <View style={{ ...wrapStyle('skills'), position: 'relative' }}>
         {skills.length > 0 && <SectionTitle id="skills" />}
         {skills.map((sk, i) =>
           stacked ? (
-            <View key={i} style={s.skillBlock}>
+            <View key={i} style={[s.skillBlock, { position: 'relative' }]}>
               <Text style={s.skillGroup}>{sk.group}</Text>
               <Text>{sk.items}</Text>
               <CustomFields fields={sk.customFields} />
+              <BorderOverlay id={`skills-${i}`} />
             </View>
           ) : (
-            <View key={i} style={s.skillRow}>
+            <View key={i} style={[s.skillRow, { position: 'relative' }]}>
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row' }}>
                   <Text style={[s.skillGroup, s.skillGroupCol]}>{sk.group}</Text>
@@ -202,18 +250,20 @@ export function ResumePDF({ data, styleTokens }) {
                 </View>
                 <CustomFields fields={sk.customFields} />
               </View>
+              <BorderOverlay id={`skills-${i}`} />
             </View>
           ),
         )}
+        <BorderOverlay id="skills" />
       </View>
     )
   }
 
   const Education = ({ span }) => (
-    <View style={wrapStyle('education')}>
+    <View style={{ ...wrapStyle('education'), position: 'relative' }}>
       {education.length > 0 && <SectionTitle id="education" />}
       {education.map((ed, i) => (
-        <View key={i}>
+        <View key={i} style={{ position: 'relative' }}>
           {span <= 6 ? (
             <View style={s.skillBlock}>
               <Text style={s.role}>{ed.degree}</Text>
@@ -230,8 +280,10 @@ export function ResumePDF({ data, styleTokens }) {
             </>
           )}
           <CustomFields fields={ed.customFields} />
+          <BorderOverlay id={`education-${i}`} />
         </View>
       ))}
+      <BorderOverlay id="education" />
     </View>
   )
 
@@ -242,7 +294,7 @@ export function ResumePDF({ data, styleTokens }) {
     if (!cs) return null
     const lines = (cs.body || '').split('\n').filter((l) => l.trim())
     return (
-      <View style={wrapStyle(id)}>
+      <View style={{ ...wrapStyle(id), position: 'relative' }}>
         {cs.title ? <SectionTitle id={id} text={cs.title} /> : null}
         {lines.map((line, i) =>
           line.trimStart().startsWith('- ') ? (
@@ -254,6 +306,7 @@ export function ResumePDF({ data, styleTokens }) {
             <Text key={i} style={{ marginBottom: 2 }}>{line}</Text>
           ),
         )}
+        <BorderOverlay id={id} />
       </View>
     )
   }
@@ -277,9 +330,15 @@ export function ResumePDF({ data, styleTokens }) {
         {st.grid.rows.map((row, ri) => {
           const totalSpan = row.cells.reduce((a, c) => a + c.span, 0) || 12
           return (
-            <View key={row.id} style={{ flexDirection: 'row', gap: gutter }}>
+            <View key={row.id} style={{ flexDirection: 'row', gap: gutter, position: 'relative' }}>
+              {showBorders && (
+                <BorderOverlay id={`row-${row.id}`} />
+              )}
               {row.cells.map((cell) => (
-                <View key={cell.id} style={{ flexBasis: 0, flexGrow: cell.span / totalSpan, minWidth: 0 }}>
+                <View key={cell.id} style={{ flexBasis: 0, flexGrow: cell.span / totalSpan, minWidth: 0, position: 'relative' }}>
+                  {showBorders && (
+                    <BorderOverlay id={`cell-${cell.id}`} />
+                  )}
                   {cell.blocks.map((b) => renderBlock(b, Math.round((cell.span / totalSpan) * 12)))}
                 </View>
               ))}

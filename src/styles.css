@@ -247,19 +247,25 @@ body {
 }
 .dyn-controls button:disabled { opacity: 0.35; cursor: default; }
 .dyn-controls button:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
-.dyn-remove { color: rgba(26, 24, 23, 0.45); }
-.dyn-remove:hover { border-color: var(--red); color: var(--red); }
+.dyn-remove {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+  font-size: 14px;
+  font-weight: 700;
+}
+.dyn-remove:hover { background: var(--red-dark); border-color: var(--red-dark); color: #fff; }
 .dyn-add {
   font-family: var(--mono);
   font-size: 11px;
-  padding: 5px 10px;
+  padding: 6px 12px;
   background: none;
-  border: 1px dashed rgba(26, 24, 23, 0.3);
-  color: var(--ink);
+  border: 1px dashed rgba(217, 58, 34, 0.6);
+  color: var(--red);
   cursor: pointer;
-  margin-top: 4px;
+  margin-top: 6px;
 }
-.dyn-add:hover { border-color: var(--red); color: var(--red); }
+.dyn-add:hover { background: rgba(217, 58, 34, 0.08); border-color: var(--red); color: var(--red); }
 .dyn-hint {
   font-size: 9.5px;
   color: rgba(26, 24, 23, 0.55);
@@ -1092,17 +1098,18 @@ body {
 .row-tools { display: flex; gap: 6px; justify-content: flex-end; }
 .row-tools button {
   font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: 10px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  padding: 2px 7px;
-  background: none;
-  border: none;
-  color: rgba(26, 24, 23, 0.4);
+  padding: 3px 8px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
   cursor: pointer;
 }
-.row-tools button:hover { color: var(--red); }
-.row-tools .danger:hover { color: var(--red); }
+.row-tools button:hover { border-color: var(--red); color: var(--red); }
+.row-tools .danger { background: var(--red); border-color: var(--red); color: #fff; }
+.row-tools .danger:hover { background: var(--red-dark); border-color: var(--red-dark); color: #fff; }
 
 /* ── contextual panel bits ── */
 .sp-crumb {

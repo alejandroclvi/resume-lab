@@ -99,7 +99,7 @@ function DynamicFields({ items, onChange }) {
         </div>
       ))}
       <button className="dyn-add" onClick={add}>+ Add field</button>
-      <p className="dyn-hint">Render: inline (with the entry), header (only for basics), or hidden (stored, not printed).</p>
+      <p className="dyn-hint">Render: inline (with the entry), header (only for basics), or hidden (stored, not printed). Use the ↑/↓ arrows to reorder fields.</p>
     </div>
   )
 }
