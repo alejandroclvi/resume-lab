@@ -42,6 +42,38 @@ function Field({ label, value, onChange, textarea = false, rows = 3 }) {
   )
 }
 
+// User-defined fields inside a block. Each has a label + value; both are
+// editable and render in the PDF.
+function DynamicFields({ items, onChange }) {
+  const ensure = () => items || []
+  const update = (idx, patch) => onChange(ensure().map((f, i) => (i === idx ? { ...f, ...patch } : f)))
+  const add = () => onChange([...ensure(), { label: '', value: '' }])
+  const remove = (idx) => onChange(ensure().filter((_, i) => i !== idx))
+
+  return (
+    <div className="dynamic-fields">
+      {ensure().map((f, i) => (
+        <div className="dyn-field" key={i}>
+          <input
+            className="dyn-label"
+            placeholder="field name"
+            value={f.label}
+            onChange={(e) => update(i, { label: e.target.value })}
+          />
+          <input
+            className="dyn-value"
+            placeholder="value"
+            value={f.value}
+            onChange={(e) => update(i, { value: e.target.value })}
+          />
+          <button className="dyn-remove" title="Remove field" onClick={() => remove(i)}>×</button>
+        </div>
+      ))}
+      <button className="dyn-add" onClick={add}>+ Add field</button>
+    </div>
+  )
+}
+
 // Block ids (as used on the canvas/proof) → which editor section holds
 // that content. Custom sections are edited in the Style inspector instead.
 const FOCUS_MAP = {
@@ -110,6 +142,10 @@ export function Editor({ data, setData, focus }) {
           <Field label="LinkedIn" value={data.basics.linkedin} onChange={(v) => set('basics.linkedin', v)} />
           <Field label="GitHub" value={data.basics.github} onChange={(v) => set('basics.github', v)} />
         </div>
+        <DynamicFields
+          items={data.basics.customFields}
+          onChange={(v) => set('basics.customFields', v)}
+        />
       </Section>
 
       <Section label="Summary" focusSignal={sig('summary')}>
@@ -135,9 +171,13 @@ export function Editor({ data, setData, focus }) {
               value={job.bullets.join('\n')}
               onChange={(v) => set(`experience.${i}.bullets`, v.split('\n'))}
             />
+            <DynamicFields
+              items={job.customFields}
+              onChange={(v) => set(`experience.${i}.customFields`, v)}
+            />
           </div>
         ))}
-        <button className="add" onClick={() => add('experience', { role: '', company: '', dates: '', bullets: [''] })}>
+        <button className="add" onClick={() => add('experience', { role: '', company: '', dates: '', bullets: [''], customFields: [] })}>
           + Add position
         </button>
       </Section>
@@ -153,9 +193,13 @@ export function Editor({ data, setData, focus }) {
               <Field label="Group" value={sk.group} onChange={(v) => set(`skills.${i}.group`, v)} />
               <Field label="Items" value={sk.items} onChange={(v) => set(`skills.${i}.items`, v)} />
             </div>
+            <DynamicFields
+              items={sk.customFields}
+              onChange={(v) => set(`skills.${i}.customFields`, v)}
+            />
           </div>
         ))}
-        <button className="add" onClick={() => add('skills', { group: '', items: '' })}>+ Add skill group</button>
+        <button className="add" onClick={() => add('skills', { group: '', items: '', customFields: [] })}>+ Add skill group</button>
       </Section>
 
       <Section label="Education" focusSignal={sig('education')}>
@@ -170,9 +214,13 @@ export function Editor({ data, setData, focus }) {
               <Field label="School" value={ed.school} onChange={(v) => set(`education.${i}.school`, v)} />
               <Field label="Dates" value={ed.dates} onChange={(v) => set(`education.${i}.dates`, v)} />
             </div>
+            <DynamicFields
+              items={ed.customFields}
+              onChange={(v) => set(`education.${i}.customFields`, v)}
+            />
           </div>
         ))}
-        <button className="add" onClick={() => add('education', { degree: '', school: '', dates: '' })}>+ Add education</button>
+        <button className="add" onClick={() => add('education', { degree: '', school: '', dates: '', customFields: [] })}>+ Add education</button>
       </Section>
     </div>
   )

@@ -62,6 +62,9 @@ function makeStyles(st) {
     skillItems: { flex: 1 },
     skillBlock: { marginBottom: 5 },
     eduRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+    customField: { flexDirection: 'row', alignItems: 'baseline', gap: 4, marginTop: 2 },
+    customLabel: { fontSize: st.type.baseSize - 1, color: st.type.mutedColor, fontStyle: 'italic' },
+    customValue: { fontSize: st.type.baseSize - 0.5, color: st.type.color },
   }
 }
 
@@ -104,6 +107,21 @@ export function ResumePDF({ data, styleTokens }) {
     return w
   }
 
+  const CustomFields = ({ fields }) => {
+    const list = (fields || []).filter((f) => f.label?.trim() || f.value?.trim())
+    if (!list.length) return null
+    return (
+      <View style={{ marginTop: 4 }}>
+        {list.map((f, i) => (
+          <View key={i} style={s.customField}>
+            {f.label?.trim() && <Text style={s.customLabel}>{f.label.trim()}: </Text>}
+            <Text style={s.customValue}>{f.value}</Text>
+          </View>
+        ))}
+      </View>
+    )
+  }
+
   const Header = () => (
     <View style={wrapStyle('header')}>
       <Text style={s.name}>{basics.name}</Text>
@@ -116,6 +134,7 @@ export function ResumePDF({ data, styleTokens }) {
           </Text>
         ))}
       </View>
+      <CustomFields fields={basics.customFields} />
       <View style={s.rule} />
     </View>
   )
@@ -150,6 +169,7 @@ export function ResumePDF({ data, styleTokens }) {
               <Text style={s.bulletText}>{b}</Text>
             </View>
           ))}
+          <CustomFields fields={job.customFields} />
         </View>
       ))}
     </View>
@@ -168,11 +188,17 @@ export function ResumePDF({ data, styleTokens }) {
             <View key={i} style={s.skillBlock}>
               <Text style={s.skillGroup}>{sk.group}</Text>
               <Text>{sk.items}</Text>
+              <CustomFields fields={sk.customFields} />
             </View>
           ) : (
             <View key={i} style={s.skillRow}>
-              <Text style={[s.skillGroup, s.skillGroupCol]}>{sk.group}</Text>
-              <Text style={s.skillItems}>{sk.items}</Text>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row' }}>
+                  <Text style={[s.skillGroup, s.skillGroupCol]}>{sk.group}</Text>
+                  <Text style={s.skillItems}>{sk.items}</Text>
+                </View>
+                <CustomFields fields={sk.customFields} />
+              </View>
             </View>
           ),
         )}
@@ -200,6 +226,7 @@ export function ResumePDF({ data, styleTokens }) {
               <Text style={s.company}>{ed.school}</Text>
             </>
           )}
+          <CustomFields fields={ed.customFields} />
         </View>
       ))}
     </View>
